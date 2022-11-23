@@ -6,7 +6,7 @@ from discord.ext import commands
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 
-nations = ["персия", "вавилон", "сиам", "росссия", "австрия", "ацтеки", "германия", "египет", "ирокезы", "корея",
+nations = ["персия", "вавилон", "сиам", "россия", "австрия", "ацтеки", "германия", "египет", "ирокезы", "корея",
            "полинезия", "америка", "бразилия", "голландия", "зулусы", "испания", "майя", "польша", "сонгай", "шошоны",
            "англия", "греция", "индия", "карфаген", "марокко", "португалия", "турция", "эфиопия", "аравия", "венеция",
            "гунны", "индонезия", "кельты", "монголия", "рим", "франция", "япония", "ассирия", "византия", "дания",
@@ -51,7 +51,7 @@ async def start(ctx):
                     nat.append(a)
                     chosen_nations -= set(a)
 
-                res = ' \n'.join(f"> ``Игрок {i}:``  ```{' '.join(n.title() for n in nat[i - 1])}```\n" for i in range(1, int(message_cnt_players.content) + 1))
+                res = ' \n'.join(f"> ``Игрок {i}:``  ```{' / '.join(n.title() for n in nat[i - 1])}```\n" for i in range(1, int(message_cnt_players.content) + 1))
 
                 await ctx.channel.send(res)
                 chosen_nations = set()
