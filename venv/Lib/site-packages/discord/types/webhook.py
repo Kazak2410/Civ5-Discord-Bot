@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,12 +25,12 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict
-from typing_extensions import NotRequired
+from typing import Literal
 
+from .._typed_dict import NotRequired, TypedDict
+from .channel import PartialChannel
 from .snowflake import Snowflake
 from .user import User
-from .channel import PartialChannel
 
 
 class SourceGuild(TypedDict):
@@ -42,26 +43,22 @@ WebhookType = Literal[1, 2, 3]
 
 
 class FollowerWebhook(TypedDict):
-    channel_id: Snowflake
-    webhook_id: Snowflake
     source_channel: NotRequired[PartialChannel]
     source_guild: NotRequired[SourceGuild]
+    channel_id: Snowflake
+    webhook_id: Snowflake
 
 
 class PartialWebhook(TypedDict):
-    id: Snowflake
-    type: WebhookType
     guild_id: NotRequired[Snowflake]
     user: NotRequired[User]
     token: NotRequired[str]
+    id: Snowflake
+    type: WebhookType
 
 
-class _FullWebhook(TypedDict, total=False):
-    name: Optional[str]
-    avatar: Optional[str]
-    channel_id: Snowflake
-    application_id: Optional[Snowflake]
-
-
-class Webhook(PartialWebhook, _FullWebhook):
-    ...
+class Webhook(PartialWebhook):
+    name: NotRequired[str | None]
+    avatar: NotRequired[str | None]
+    channel_id: NotRequired[Snowflake]
+    application_id: NotRequired[Snowflake | None]

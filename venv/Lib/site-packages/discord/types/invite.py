@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,15 +25,15 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, TypedDict, Union
-from typing_extensions import NotRequired
+from typing import Literal, Union
 
-from .scheduled_event import GuildScheduledEvent
-from .snowflake import Snowflake
-from .guild import InviteGuild, _GuildPreviewUnique
-from .channel import PartialChannel
-from .user import PartialUser
+from .._typed_dict import NotRequired, TypedDict
 from .appinfo import PartialAppInfo
+from .channel import PartialChannel
+from .guild import InviteGuild, _GuildPreviewUnique
+from .scheduled_events import ScheduledEvent
+from .snowflake import Snowflake
+from .user import PartialUser
 
 InviteTargetType = Literal[1, 2]
 
@@ -43,12 +44,11 @@ class _InviteMetadata(TypedDict, total=False):
     max_age: int
     temporary: bool
     created_at: str
-    expires_at: Optional[str]
+    expires_at: str | None
 
 
 class VanityInvite(_InviteMetadata):
-    code: Optional[str]
-    revoked: NotRequired[bool]
+    code: str | None
 
 
 class IncompleteInvite(_InviteMetadata):
@@ -56,20 +56,25 @@ class IncompleteInvite(_InviteMetadata):
     channel: PartialChannel
 
 
-class Invite(IncompleteInvite, total=False):
-    guild: InviteGuild
-    inviter: PartialUser
-    target_user: PartialUser
-    target_type: InviteTargetType
-    target_application: PartialAppInfo
-    guild_scheduled_event: GuildScheduledEvent
+class Invite(IncompleteInvite):
+    guild: NotRequired[InviteGuild]
+    inviter: NotRequired[PartialUser]
+    scheduled_event: NotRequired[ScheduledEvent]
+    target_user: NotRequired[PartialUser]
+    target_type: NotRequired[InviteTargetType]
+    target_application: NotRequired[PartialAppInfo]
 
 
 class InviteWithCounts(Invite, _GuildPreviewUnique):
-    ...
+    pass
 
 
 class GatewayInviteCreate(TypedDict):
+    guild_id: NotRequired[Snowflake]
+    inviter: NotRequired[PartialUser]
+    target_type: NotRequired[InviteTargetType]
+    target_user: NotRequired[PartialUser]
+    target_application: NotRequired[PartialAppInfo]
     channel_id: Snowflake
     code: str
     created_at: str
@@ -77,17 +82,12 @@ class GatewayInviteCreate(TypedDict):
     max_uses: int
     temporary: bool
     uses: bool
-    guild_id: Snowflake
-    inviter: NotRequired[PartialUser]
-    target_type: NotRequired[InviteTargetType]
-    target_user: NotRequired[PartialUser]
-    target_application: NotRequired[PartialAppInfo]
 
 
 class GatewayInviteDelete(TypedDict):
+    guild_id: NotRequired[Snowflake]
     channel_id: Snowflake
     code: str
-    guild_id: NotRequired[Snowflake]
 
 
 GatewayInvite = Union[GatewayInviteCreate, GatewayInviteDelete]

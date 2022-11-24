@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,27 +25,17 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from .mixins import Hashable
-from .utils import snowflake_time, MISSING
+from typing import TYPE_CHECKING, SupportsInt, Union
 
-from typing import (
-    SupportsInt,
-    TYPE_CHECKING,
-    Type,
-    Union,
-)
+from . import utils
+from .mixins import Hashable
 
 if TYPE_CHECKING:
     import datetime
-    from . import abc
 
     SupportsIntCast = Union[SupportsInt, str, bytes, bytearray]
 
-# fmt: off
-__all__ = (
-    'Object',
-)
-# fmt: on
+__all__ = ("Object",)
 
 
 class Object(Hashable):
@@ -56,8 +47,8 @@ class Object(Hashable):
     as a substitute instead. Note that even though this is the case, not all
     objects (if any) actually inherit from this class.
 
-    There are also some cases where some websocket events are received
-    in :issue:`strange order <21>` and when such events happened you would
+    There are also some cases where some WebSocket events are received
+    in :dpy-issue:`strange order <21>` and when such events happened you would
     receive this class rather than the actual data class. These cases are
     extremely rare.
 
@@ -76,42 +67,40 @@ class Object(Hashable):
             Returns the object's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The ID of the object.
-    type: Type[:class:`abc.Snowflake`]
-        The discord.py model type of the object, if not specified, defaults to this class.
-
-        .. note::
-
-            In instances where there are multiple applicable types, use a shared base class.
-            for example, both :class:`Member` and :class:`User` are subclasses of :class:`abc.User`.
-
-        .. versionadded:: 2.0
     """
 
-    def __init__(self, id: SupportsIntCast, *, type: Type[abc.Snowflake] = MISSING):
+    def __init__(self, id: SupportsIntCast):
         try:
             id = int(id)
         except ValueError:
-            raise TypeError(f'id parameter must be convertible to int not {id.__class__.__name__}') from None
-        self.id: int = id
-        self.type: Type[abc.Snowflake] = type or self.__class__
+            raise TypeError(
+                f"id parameter must be convertible to int not {id.__class__!r}"
+            ) from None
+        else:
+            self.id = id
 
     def __repr__(self) -> str:
-        return f'<Object id={self.id!r} type={self.type!r}>'
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, self.type):
-            return self.id == other.id
-        return NotImplemented
-
-    __hash__ = Hashable.__hash__
+        return f"<Object id={self.id!r}>"
 
     @property
     def created_at(self) -> datetime.datetime:
-        """:class:`datetime.datetime`: Returns the snowflake's creation time in UTC."""
-        return snowflake_time(self.id)
+        """Returns the snowflake's creation time in UTC."""
+        return utils.snowflake_time(self.id)
 
+    @property
+    def worker_id(self) -> int:
+        """Returns the worker id that made the snowflake."""
+        return (self.id & 0x3E0000) >> 17
 
-OLDEST_OBJECT = Object(id=0)
+    @property
+    def process_id(self) -> int:
+        """Returns the process id that made the snowflake."""
+        return (self.id & 0x1F000) >> 12
+
+    @property
+    def increment_id(self) -> int:
+        """Returns the increment id that made the snowflake."""
+        return self.id & 0xFFF

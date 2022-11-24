@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,11 +25,11 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
-from typing_extensions import NotRequired
+from typing import Literal
 
+from .._typed_dict import NotRequired, TypedDict
+from ..flags import ChannelFlags
 from .snowflake import Snowflake
-from .message import Message
 
 ThreadType = Literal[10, 11, 12]
 ThreadArchiveDuration = Literal[60, 1440, 4320, 10080]
@@ -42,16 +43,18 @@ class ThreadMember(TypedDict):
 
 
 class ThreadMetadata(TypedDict):
+    invitable: NotRequired[bool]
+    create_timestamp: NotRequired[str]
     archived: bool
     auto_archive_duration: ThreadArchiveDuration
     archive_timestamp: str
-    archiver_id: NotRequired[Snowflake]
-    locked: NotRequired[bool]
-    invitable: NotRequired[bool]
-    create_timestamp: NotRequired[str]
+    locked: bool
 
 
 class Thread(TypedDict):
+    member: NotRequired[ThreadMember]
+    last_message_id: NotRequired[Snowflake | None]
+    last_pin_timestamp: NotRequired[Snowflake | None]
     id: Snowflake
     guild_id: Snowflake
     parent_id: Snowflake
@@ -62,19 +65,11 @@ class Thread(TypedDict):
     message_count: int
     rate_limit_per_user: int
     thread_metadata: ThreadMetadata
-    member: NotRequired[ThreadMember]
-    last_message_id: NotRequired[Optional[Snowflake]]
-    last_pin_timestamp: NotRequired[Optional[Snowflake]]
-    newly_created: NotRequired[bool]
-    flags: NotRequired[int]
-    applied_tags: NotRequired[List[Snowflake]]
+    flags: ChannelFlags
+    total_message_sent: int
 
 
 class ThreadPaginationPayload(TypedDict):
-    threads: List[Thread]
-    members: List[ThreadMember]
+    threads: list[Thread]
+    members: list[ThreadMember]
     has_more: bool
-
-
-class ForumThread(Thread):
-    message: Message

@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,17 +25,18 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from typing import TypedDict
+
 from .snowflake import Snowflake
 
 
 class WelcomeScreen(TypedDict):
     description: str
-    welcome_channels: List[WelcomeScreenChannel]
+    welcome_channels: list[WelcomeScreenChannel]
 
 
 class WelcomeScreenChannel(TypedDict):
     channel_id: Snowflake
     description: str
-    emoji_id: Optional[Snowflake]
-    emoji_name: Optional[str]
+    emoji_id: Snowflake | None
+    emoji_name: str | None

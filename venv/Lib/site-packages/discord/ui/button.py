@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,29 +25,26 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Callable, Literal, Optional, TYPE_CHECKING, Tuple, TypeVar, Union
 import inspect
 import os
+from typing import TYPE_CHECKING, Callable, TypeVar
 
-
-from .item import Item, ItemCallbackType
+from ..components import Button as ButtonComponent
 from ..enums import ButtonStyle, ComponentType
 from ..partial_emoji import PartialEmoji, _EmojiTag
-from ..components import Button as ButtonComponent
+from .item import Item, ItemCallbackType
 
 __all__ = (
-    'Button',
-    'button',
+    "Button",
+    "button",
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-    from .view import View
     from ..emoji import Emoji
-    from ..types.components import ButtonComponent as ButtonComponentPayload
+    from .view import View
 
-V = TypeVar('V', bound='View', covariant=True)
+B = TypeVar("B", bound="Button")
+V = TypeVar("V", bound="View", covariant=True)
 
 
 class Button(Item[V]):
@@ -55,7 +53,7 @@ class Button(Item[V]):
     .. versionadded:: 2.0
 
     Parameters
-    ------------
+    ----------
     style: :class:`discord.ButtonStyle`
         The style of the button.
     custom_id: Optional[:class:`str`]
@@ -66,7 +64,7 @@ class Button(Item[V]):
     disabled: :class:`bool`
         Whether the button is disabled or not.
     label: Optional[:class:`str`]
-        The label of the button, if any.
+        The label of the button, if any. Maximum of 80 chars.
     emoji: Optional[Union[:class:`.PartialEmoji`, :class:`.Emoji`, :class:`str`]]
         The emoji of the button, if available.
     row: Optional[:class:`int`]
@@ -77,36 +75,42 @@ class Button(Item[V]):
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    __item_repr_attributes__: Tuple[str, ...] = (
-        'style',
-        'url',
-        'disabled',
-        'label',
-        'emoji',
-        'row',
+    __item_repr_attributes__: tuple[str, ...] = (
+        "style",
+        "url",
+        "disabled",
+        "label",
+        "emoji",
+        "row",
     )
 
     def __init__(
         self,
         *,
         style: ButtonStyle = ButtonStyle.secondary,
-        label: Optional[str] = None,
+        label: str | None = None,
         disabled: bool = False,
-        custom_id: Optional[str] = None,
-        url: Optional[str] = None,
-        emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-        row: Optional[int] = None,
+        custom_id: str | None = None,
+        url: str | None = None,
+        emoji: str | Emoji | PartialEmoji | None = None,
+        row: int | None = None,
     ):
         super().__init__()
+        if label and len(str(label)) > 80:
+            raise ValueError("label must be 80 characters or fewer")
+        if custom_id is not None and len(str(custom_id)) > 100:
+            raise ValueError("custom_id must be 100 characters or fewer")
         if custom_id is not None and url is not None:
-            raise TypeError('cannot mix both url and custom_id with Button')
+            raise TypeError("cannot mix both url and custom_id with Button")
+
+        if not isinstance(custom_id, str) and custom_id is not None:
+            raise TypeError(
+                f"expected custom_id to be str, not {custom_id.__class__.__name__}"
+            )
 
         self._provided_custom_id = custom_id is not None
         if url is None and custom_id is None:
             custom_id = os.urandom(16).hex()
-
-        if custom_id is not None and not isinstance(custom_id, str):
-            raise TypeError(f'expected custom_id to be str not {custom_id.__class__.__name__}')
 
         if url is not None:
             style = ButtonStyle.link
@@ -117,9 +121,13 @@ class Button(Item[V]):
             elif isinstance(emoji, _EmojiTag):
                 emoji = emoji._to_partial()
             else:
-                raise TypeError(f'expected emoji to be str, Emoji, or PartialEmoji not {emoji.__class__.__name__}')
+                raise TypeError(
+                    "expected emoji to be str, Emoji, or PartialEmoji not"
+                    f" {emoji.__class__}"
+                )
 
         self._underlying = ButtonComponent._raw_construct(
+            type=ComponentType.button,
             custom_id=custom_id,
             url=url,
             disabled=disabled,
@@ -131,77 +139,81 @@ class Button(Item[V]):
 
     @property
     def style(self) -> ButtonStyle:
-        """:class:`discord.ButtonStyle`: The style of the button."""
+        """The style of the button."""
         return self._underlying.style
 
     @style.setter
-    def style(self, value: ButtonStyle) -> None:
+    def style(self, value: ButtonStyle):
         self._underlying.style = value
 
     @property
-    def custom_id(self) -> Optional[str]:
-        """Optional[:class:`str`]: The ID of the button that gets received during an interaction.
+    def custom_id(self) -> str | None:
+        """The ID of the button that gets received during an interaction.
 
         If this button is for a URL, it does not have a custom ID.
         """
         return self._underlying.custom_id
 
     @custom_id.setter
-    def custom_id(self, value: Optional[str]) -> None:
+    def custom_id(self, value: str | None):
         if value is not None and not isinstance(value, str):
-            raise TypeError('custom_id must be None or str')
-
+            raise TypeError("custom_id must be None or str")
+        if value and len(value) > 100:
+            raise ValueError("custom_id must be 100 characters or fewer")
         self._underlying.custom_id = value
-        self._provided_custom_id = value is not None
 
     @property
-    def url(self) -> Optional[str]:
-        """Optional[:class:`str`]: The URL this button sends you to."""
+    def url(self) -> str | None:
+        """The URL this button sends you to."""
         return self._underlying.url
 
     @url.setter
-    def url(self, value: Optional[str]) -> None:
+    def url(self, value: str | None):
         if value is not None and not isinstance(value, str):
-            raise TypeError('url must be None or str')
+            raise TypeError("url must be None or str")
         self._underlying.url = value
 
     @property
     def disabled(self) -> bool:
-        """:class:`bool`: Whether the button is disabled or not."""
+        """Whether the button is disabled or not."""
         return self._underlying.disabled
 
     @disabled.setter
-    def disabled(self, value: bool) -> None:
+    def disabled(self, value: bool):
         self._underlying.disabled = bool(value)
 
     @property
-    def label(self) -> Optional[str]:
-        """Optional[:class:`str`]: The label of the button, if available."""
+    def label(self) -> str | None:
+        """The label of the button, if available."""
         return self._underlying.label
 
     @label.setter
-    def label(self, value: Optional[str]) -> None:
+    def label(self, value: str | None):
+        if value and len(str(value)) > 80:
+            raise ValueError("label must be 80 characters or fewer")
         self._underlying.label = str(value) if value is not None else value
 
     @property
-    def emoji(self) -> Optional[PartialEmoji]:
-        """Optional[:class:`.PartialEmoji`]: The emoji of the button, if available."""
+    def emoji(self) -> PartialEmoji | None:
+        """The emoji of the button, if available."""
         return self._underlying.emoji
 
     @emoji.setter
-    def emoji(self, value: Optional[Union[str, Emoji, PartialEmoji]]) -> None:
-        if value is not None:
-            if isinstance(value, str):
-                self._underlying.emoji = PartialEmoji.from_str(value)
-            elif isinstance(value, _EmojiTag):
-                self._underlying.emoji = value._to_partial()
-            else:
-                raise TypeError(f'expected str, Emoji, or PartialEmoji, received {value.__class__.__name__} instead')
-        else:
+    def emoji(self, value: str | Emoji | PartialEmoji | None):  # type: ignore
+        if value is None:
             self._underlying.emoji = None
+        elif isinstance(value, str):
+            self._underlying.emoji = PartialEmoji.from_str(value)
+        elif isinstance(value, _EmojiTag):
+            self._underlying.emoji = value._to_partial()
+        else:
+            raise TypeError(
+                "expected str, Emoji, or PartialEmoji, received"
+                f" {value.__class__} instead"
+            )
 
     @classmethod
-    def from_component(cls, button: ButtonComponent) -> Self:
+    def from_component(cls: type[B], button: ButtonComponent) -> B:
         return cls(
             style=button.style,
             label=button.label,
@@ -213,10 +225,10 @@ class Button(Item[V]):
         )
 
     @property
-    def type(self) -> Literal[ComponentType.button]:
+    def type(self) -> ComponentType:
         return self._underlying.type
 
-    def to_component_dict(self) -> ButtonComponentPayload:
+    def to_component_dict(self):
         return self._underlying.to_dict()
 
     def is_dispatchable(self) -> bool:
@@ -227,24 +239,24 @@ class Button(Item[V]):
             return self.url is not None
         return super().is_persistent()
 
-    def _refresh_component(self, button: ButtonComponent) -> None:
+    def refresh_component(self, button: ButtonComponent) -> None:
         self._underlying = button
 
 
 def button(
     *,
-    label: Optional[str] = None,
-    custom_id: Optional[str] = None,
+    label: str | None = None,
+    custom_id: str | None = None,
     disabled: bool = False,
     style: ButtonStyle = ButtonStyle.secondary,
-    emoji: Optional[Union[str, Emoji, PartialEmoji]] = None,
-    row: Optional[int] = None,
-) -> Callable[[ItemCallbackType[V, Button[V]]], Button[V]]:
+    emoji: str | Emoji | PartialEmoji | None = None,
+    row: int | None = None,
+) -> Callable[[ItemCallbackType], ItemCallbackType]:
     """A decorator that attaches a button to a component.
 
     The function being decorated should have three parameters, ``self`` representing
-    the :class:`discord.ui.View`, the :class:`discord.Interaction` you receive and
-    the :class:`discord.ui.Button` being pressed.
+    the :class:`discord.ui.View`, the :class:`discord.ui.Button` being pressed and
+    the :class:`discord.Interaction` you receive.
 
     .. note::
 
@@ -255,7 +267,7 @@ def button(
         with it.
 
     Parameters
-    ------------
+    ----------
     label: Optional[:class:`str`]
         The label of the button, if any.
     custom_id: Optional[:class:`str`]
@@ -276,20 +288,20 @@ def button(
         ordering. The row number must be between 0 and 4 (i.e. zero indexed).
     """
 
-    def decorator(func: ItemCallbackType[V, Button[V]]) -> ItemCallbackType[V, Button[V]]:
+    def decorator(func: ItemCallbackType) -> ItemCallbackType:
         if not inspect.iscoroutinefunction(func):
-            raise TypeError('button function must be a coroutine function')
+            raise TypeError("button function must be a coroutine function")
 
         func.__discord_ui_model_type__ = Button
         func.__discord_ui_model_kwargs__ = {
-            'style': style,
-            'custom_id': custom_id,
-            'url': None,
-            'disabled': disabled,
-            'label': label,
-            'emoji': emoji,
-            'row': row,
+            "style": style,
+            "custom_id": custom_id,
+            "url": None,
+            "disabled": disabled,
+            "label": label,
+            "emoji": emoji,
+            "row": row,
         }
         return func
 
-    return decorator  # type: ignore
+    return decorator

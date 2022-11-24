@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,27 +25,27 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import List, Literal, Optional, TypedDict
-from typing_extensions import NotRequired
-from .user import User
+from typing import Literal
+
+from .._typed_dict import NotRequired, TypedDict
 from .snowflake import Snowflake
+from .user import PartialUser
 
-
-StatusType = Literal['idle', 'dnd', 'online', 'offline']
+StatusType = Literal["idle", "dnd", "online", "offline"]
 
 
 class PartialPresenceUpdate(TypedDict):
-    user: User
+    user: PartialUser
     guild_id: Snowflake
     status: StatusType
-    activities: List[Activity]
+    activities: list[Activity]
     client_status: ClientStatus
 
 
 class ClientStatus(TypedDict, total=False):
-    desktop: StatusType
-    mobile: StatusType
-    web: StatusType
+    desktop: str
+    mobile: str
+    web: str
 
 
 class ActivityTimestamps(TypedDict, total=False):
@@ -54,7 +55,7 @@ class ActivityTimestamps(TypedDict, total=False):
 
 class ActivityParty(TypedDict, total=False):
     id: str
-    size: List[int]
+    size: list[int]
 
 
 class ActivityAssets(TypedDict, total=False):
@@ -71,18 +72,23 @@ class ActivitySecrets(TypedDict, total=False):
 
 
 class ActivityEmoji(TypedDict):
-    name: str
     id: NotRequired[Snowflake]
     animated: NotRequired[bool]
+    name: str
+
+
+class ActivityButton(TypedDict):
+    label: str
+    url: str
 
 
 ActivityType = Literal[0, 1, 2, 4, 5]
 
 
 class SendableActivity(TypedDict):
+    url: NotRequired[str | None]
     name: str
     type: ActivityType
-    url: NotRequired[Optional[str]]
 
 
 class _BaseActivity(SendableActivity):
@@ -90,16 +96,15 @@ class _BaseActivity(SendableActivity):
 
 
 class Activity(_BaseActivity, total=False):
-    state: Optional[str]
-    details: Optional[str]
+    state: str | None
+    details: str | None
     timestamps: ActivityTimestamps
     assets: ActivityAssets
     party: ActivityParty
     application_id: Snowflake
     flags: int
-    emoji: Optional[ActivityEmoji]
+    emoji: ActivityEmoji | None
     secrets: ActivitySecrets
-    session_id: Optional[str]
+    session_id: str | None
     instance: bool
-    buttons: List[str]
-    sync_id: str
+    buttons: list[str]

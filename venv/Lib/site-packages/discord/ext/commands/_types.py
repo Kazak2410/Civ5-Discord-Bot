@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -23,51 +24,27 @@ DEALINGS IN THE SOFTWARE.
 """
 
 
-from typing import Any, Awaitable, Callable, Coroutine, TYPE_CHECKING, Protocol, TypeVar, Union, Tuple, Optional
-
-
-T = TypeVar('T')
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar, Union
 
 if TYPE_CHECKING:
-    from typing_extensions import ParamSpec
-
-    from .bot import Bot, AutoShardedBot
-    from .context import Context
     from .cog import Cog
+    from .context import Context
     from .errors import CommandError
 
-    P = ParamSpec('P')
-    MaybeAwaitableFunc = Callable[P, 'MaybeAwaitable[T]']
-else:
-    P = TypeVar('P')
-    MaybeAwaitableFunc = Tuple[P, T]
+T = TypeVar("T")
 
-_Bot = Union['Bot', 'AutoShardedBot']
 Coro = Coroutine[Any, Any, T]
-CoroFunc = Callable[..., Coro[Any]]
 MaybeCoro = Union[T, Coro[T]]
-MaybeAwaitable = Union[T, Awaitable[T]]
+CoroFunc = Callable[..., Coro[Any]]
 
-CogT = TypeVar('CogT', bound='Optional[Cog]')
-UserCheck = Callable[["ContextT"], MaybeCoro[bool]]
-Hook = Union[Callable[["CogT", "ContextT"], Coro[Any]], Callable[["ContextT"], Coro[Any]]]
-Error = Union[Callable[["CogT", "ContextT", "CommandError"], Coro[Any]], Callable[["ContextT", "CommandError"], Coro[Any]]]
-
-ContextT = TypeVar('ContextT', bound='Context[Any]')
-BotT = TypeVar('BotT', bound=_Bot, covariant=True)
-
-ContextT_co = TypeVar('ContextT_co', bound='Context[Any]', covariant=True)
-
-
-class Check(Protocol[ContextT_co]):  # type: ignore # TypeVar is expected to be invariant
-
-    predicate: Callable[[ContextT_co], Coroutine[Any, Any, bool]]
-
-    def __call__(self, coro_or_commands: T) -> T:
-        ...
-
-
-# This is merely a tag type to avoid circular import issues.
-# Yes, this is a terrible solution but ultimately it is the only solution.
-class _BaseCommand:
-    __slots__ = ()
+Check = Union[
+    Callable[["Cog", "Context[Any]"], MaybeCoro[bool]],
+    Callable[["Context[Any]"], MaybeCoro[bool]],
+]
+Hook = Union[
+    Callable[["Cog", "Context[Any]"], Coro[Any]], Callable[["Context[Any]"], Coro[Any]]
+]
+Error = Union[
+    Callable[["Cog", "Context[Any]", "CommandError"], Coro[Any]],
+    Callable[["Context[Any]", "CommandError"], Coro[Any]],
+]

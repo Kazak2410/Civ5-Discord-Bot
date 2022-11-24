@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,21 +25,22 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-from typing import Optional, TypedDict
+from typing import TypedDict
+
+from .guild import Guild
 from .snowflake import Snowflake
 from .user import User
-from .guild import Guild
 
 
 class CreateTemplate(TypedDict):
     name: str
-    icon: Optional[bytes]
+    icon: bytes | None
 
 
 class Template(TypedDict):
     code: str
     name: str
-    description: Optional[str]
+    description: str | None
     usage_count: int
     creator_id: Snowflake
     creator: User
@@ -46,4 +48,4 @@ class Template(TypedDict):
     updated_at: str
     source_guild_id: Snowflake
     serialized_source_guild: Guild
-    is_dirty: Optional[bool]
+    is_dirty: bool | None

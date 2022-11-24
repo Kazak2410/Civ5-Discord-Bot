@@ -24,7 +24,8 @@ async def on_ready():
 @bot.command()
 async def help(ctx):
     emb = discord.Embed(title='Навигация по командам', colour=discord.Colour.red())
-    emb.add_field(name=f'{PREFIX}start', value='Генерирует нации, и распределяет их по игрокам')
+    emb.add_field(name=f'{PREFIX}start', value=f'Генерирует определенное количество наций на выбор, для каждого игрока.\n'
+                                               f'В случае, если вы видете сообщение "Все заново", введите команду {PREFIX}start.')
     await ctx.send(embed=emb)
 
 
@@ -55,6 +56,9 @@ async def start(ctx):
             except asyncio.TimeoutError:
                 await ctx.channel.send("Слишком долго, все заново!")
             else:
+                if (len(nations) // int(message_cnt_players.content)) < int(message_cnt_nat.content):
+                    await ctx.channel.send("Все заново, выбирите меньше игроков или наций!")
+
                 nat = []
                 for n in range(int(message_cnt_players.content)):
                     a = random.sample(chosen_nations, int(message_cnt_nat.content))
@@ -68,4 +72,4 @@ async def start(ctx):
 
 
 def run_bot():
-    bot.run("")
+    bot.run("MTA0NDIyNDcwOTQ1MTA3MTU3OQ.G7HPnA.bHRmguSLWlgk7TNEWzIT3f0SIA7RpFJxarksWg")

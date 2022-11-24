@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -21,8 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
+from __future__ import annotations
 
-from typing import List, Optional, TypedDict
+from .._typed_dict import NotRequired, TypedDict
 from .activity import Activity
 from .snowflake import Snowflake
 from .user import User
@@ -47,19 +49,14 @@ class WidgetMember(User, total=False):
 
 
 class Widget(TypedDict):
+    channels: NotRequired[list[WidgetChannel]]
+    members: NotRequired[list[WidgetMember]]
+    presence_count: NotRequired[int]
     id: Snowflake
     name: str
-    instant_invite: Optional[str]
-    channels: List[WidgetChannel]
-    members: List[WidgetMember]
-    presence_count: int
+    instant_invite: str
 
 
 class WidgetSettings(TypedDict):
     enabled: bool
-    channel_id: Optional[Snowflake]
-
-
-class EditWidgetSettings(TypedDict, total=False):
-    enabled: bool
-    channel_id: Optional[Snowflake]
+    channel_id: Snowflake | None

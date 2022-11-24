@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -24,18 +25,13 @@ DEALINGS IN THE SOFTWARE.
 
 from __future__ import annotations
 
-
-import time
 import random
-from typing import Callable, Generic, Literal, TypeVar, overload, Union
+import time
+from typing import Callable, Generic, Literal, TypeVar, overload
 
-T = TypeVar('T', bool, Literal[True], Literal[False])
+T = TypeVar("T", bool, Literal[True], Literal[False])
 
-# fmt: off
-__all__ = (
-    'ExponentialBackoff',
-)
-# fmt: on
+__all__ = ("ExponentialBackoff",)
 
 
 class ExponentialBackoff(Generic[T]):
@@ -72,7 +68,7 @@ class ExponentialBackoff(Generic[T]):
         rand = random.Random()
         rand.seed()
 
-        self._randfunc: Callable[..., Union[int, float]] = rand.randrange if integral else rand.uniform
+        self._randfunc: Callable[..., int | float] = rand.randrange if integral else rand.uniform  # type: ignore
 
     @overload
     def delay(self: ExponentialBackoff[Literal[False]]) -> float:
@@ -83,10 +79,10 @@ class ExponentialBackoff(Generic[T]):
         ...
 
     @overload
-    def delay(self: ExponentialBackoff[bool]) -> Union[int, float]:
+    def delay(self: ExponentialBackoff[bool]) -> int | float:
         ...
 
-    def delay(self) -> Union[int, float]:
+    def delay(self) -> int | float:
         """Compute the next delay
 
         Returns the next delay to wait according to the exponential

@@ -1,7 +1,8 @@
 """
 The MIT License (MIT)
 
-Copyright (c) 2015-present Rapptz
+Copyright (c) 2015-2021 Rapptz
+Copyright (c) 2021-present Pycord Development
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -23,24 +24,19 @@ DEALINGS IN THE SOFTWARE.
 """
 
 from __future__ import annotations
-from typing import Union, Sequence, TYPE_CHECKING, Any
 
-# fmt: off
-__all__ = (
-    'AllowedMentions',
-)
-# fmt: on
+from typing import TYPE_CHECKING, Any, TypeVar
+
+__all__ = ("AllowedMentions",)
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
-
-    from .types.message import AllowedMentions as AllowedMentionsPayload
     from .abc import Snowflake
+    from .types.message import AllowedMentions as AllowedMentionsPayload
 
 
 class _FakeBool:
     def __repr__(self):
-        return 'True'
+        return "True"
 
     def __eq__(self, other):
         return other is True
@@ -51,25 +47,27 @@ class _FakeBool:
 
 default: Any = _FakeBool()
 
+A = TypeVar("A", bound="AllowedMentions")
+
 
 class AllowedMentions:
     """A class that represents what mentions are allowed in a message.
 
     This class can be set during :class:`Client` initialisation to apply
-    to every message sent. It can also be applied on a per message basis
+    to every message sent. It can also be applied on a per-message basis
     via :meth:`abc.Messageable.send` for more fine-grained control.
 
     Attributes
-    ------------
+    ----------
     everyone: :class:`bool`
         Whether to allow everyone and here mentions. Defaults to ``True``.
-    users: Union[:class:`bool`, Sequence[:class:`abc.Snowflake`]]
+    users: Union[:class:`bool`, List[:class:`abc.Snowflake`]]
         Controls the users being mentioned. If ``True`` (the default) then
         users are mentioned based on the message content. If ``False`` then
         users are not mentioned at all. If a list of :class:`abc.Snowflake`
         is given then only the users provided will be mentioned, provided those
         users are in the message content.
-    roles: Union[:class:`bool`, Sequence[:class:`abc.Snowflake`]]
+    roles: Union[:class:`bool`, List[:class:`abc.Snowflake`]]
         Controls the roles being mentioned. If ``True`` (the default) then
         roles are mentioned based on the message content. If ``False`` then
         roles are not mentioned at all. If a list of :class:`abc.Snowflake`
@@ -82,23 +80,23 @@ class AllowedMentions:
         .. versionadded:: 1.6
     """
 
-    __slots__ = ('everyone', 'users', 'roles', 'replied_user')
+    __slots__ = ("everyone", "users", "roles", "replied_user")
 
     def __init__(
         self,
         *,
         everyone: bool = default,
-        users: Union[bool, Sequence[Snowflake]] = default,
-        roles: Union[bool, Sequence[Snowflake]] = default,
+        users: bool | list[Snowflake] = default,
+        roles: bool | list[Snowflake] = default,
         replied_user: bool = default,
     ):
-        self.everyone: bool = everyone
-        self.users: Union[bool, Sequence[Snowflake]] = users
-        self.roles: Union[bool, Sequence[Snowflake]] = roles
-        self.replied_user: bool = replied_user
+        self.everyone = everyone
+        self.users = users
+        self.roles = roles
+        self.replied_user = replied_user
 
     @classmethod
-    def all(cls) -> Self:
+    def all(cls: type[A]) -> A:
         """A factory method that returns a :class:`AllowedMentions` with all fields explicitly set to ``True``
 
         .. versionadded:: 1.5
@@ -106,7 +104,7 @@ class AllowedMentions:
         return cls(everyone=True, users=True, roles=True, replied_user=True)
 
     @classmethod
-    def none(cls) -> Self:
+    def none(cls: type[A]) -> A:
         """A factory method that returns a :class:`AllowedMentions` with all fields set to ``False``
 
         .. versionadded:: 1.5
@@ -118,22 +116,25 @@ class AllowedMentions:
         data = {}
 
         if self.everyone:
-            parse.append('everyone')
+            parse.append("everyone")
 
+        # In the following operations, the comparison operator
+        # must be used instead of the "is" operator as the program
+        # has to invoke _Fakebool.__eq__ to prevent false results.
         if self.users == True:
-            parse.append('users')
+            parse.append("users")
         elif self.users != False:
-            data['users'] = [x.id for x in self.users]
+            data["users"] = [x.id for x in self.users]
 
         if self.roles == True:
-            parse.append('roles')
+            parse.append("roles")
         elif self.roles != False:
-            data['roles'] = [x.id for x in self.roles]
+            data["roles"] = [x.id for x in self.roles]
 
         if self.replied_user:
-            data['replied_user'] = True
+            data["replied_user"] = True
 
-        data['parse'] = parse
+        data["parse"] = parse
         return data  # type: ignore
 
     def merge(self, other: AllowedMentions) -> AllowedMentions:
@@ -143,11 +144,15 @@ class AllowedMentions:
         everyone = self.everyone if other.everyone is default else other.everyone
         users = self.users if other.users is default else other.users
         roles = self.roles if other.roles is default else other.roles
-        replied_user = self.replied_user if other.replied_user is default else other.replied_user
-        return AllowedMentions(everyone=everyone, roles=roles, users=users, replied_user=replied_user)
+        replied_user = (
+            self.replied_user if other.replied_user is default else other.replied_user
+        )
+        return AllowedMentions(
+            everyone=everyone, roles=roles, users=users, replied_user=replied_user
+        )
 
     def __repr__(self) -> str:
         return (
-            f'{self.__class__.__name__}(everyone={self.everyone}, '
-            f'users={self.users}, roles={self.roles}, replied_user={self.replied_user})'
+            f"{self.__class__.__name__}(everyone={self.everyone}, "
+            f"users={self.users}, roles={self.roles}, replied_user={self.replied_user})"
         )
