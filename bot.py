@@ -4,7 +4,10 @@ import discord
 from discord.ext import commands
 
 
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
+PREFIX = "/"
+
+bot = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
+bot.remove_command('help')
 
 nations = ["персия", "вавилон", "сиам", "россия", "австрия", "ацтеки", "германия", "египет", "ирокезы", "корея",
            "полинезия", "америка", "бразилия", "голландия", "зулусы", "испания", "майя", "польша", "сонгай", "шошоны",
@@ -16,6 +19,13 @@ nations = ["персия", "вавилон", "сиам", "россия", "авс
 @bot.event
 async def on_ready():
     print("bot is ready")
+
+
+@bot.command()
+async def help(ctx):
+    emb = discord.Embed(title='Навигация по командам', colour=discord.Colour.red())
+    emb.add_field(name=f'{PREFIX}start', value='Генерирует нации, и распределяет их по игрокам')
+    await ctx.send(embed=emb)
 
 
 @bot.command()
