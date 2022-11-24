@@ -72,4 +72,4 @@ async def start(ctx):
 
 
 def run_bot():
-    bot.run("MTA0NDIyNDcwOTQ1MTA3MTU3OQ.G7HPnA.bHRmguSLWlgk7TNEWzIT3f0SIA7RpFJxarksWg")
+    bot.run("")
