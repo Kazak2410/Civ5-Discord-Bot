@@ -1,12 +1,12 @@
 import asyncio
 import random
-import discord
-from discord.ext import commands
+import disnake
+from disnake.ext import commands
 
 
 PREFIX = "/"
 
-bot = commands.Bot(command_prefix=PREFIX, intents=discord.Intents.all())
+bot = commands.Bot(command_prefix=PREFIX, intents=disnake.Intents.all())
 bot.remove_command('help')
 
 nations = ["персия", "вавилон", "сиам", "россия", "австрия", "ацтеки", "германия", "египет", "ирокезы", "корея",
@@ -23,7 +23,7 @@ async def on_ready():
 
 @bot.command()
 async def help(ctx):
-    emb = discord.Embed(title='Навигация по командам', colour=discord.Colour.red())
+    emb = disnake.Embed(title='Навигация по командам', colour=disnake.Colour.red())
     emb.add_field(name=f'{PREFIX}start', value=f'Генерирует определенное количество наций на выбор, для каждого игрока.\n'
                                                f'В случае, если вы видете сообщение "Все заново", введите команду {PREFIX}start.')
     await ctx.send(embed=emb)
@@ -72,4 +72,4 @@ async def start(ctx):
 
 
 def run_bot():
-    bot.run("MTA0NDIyNDcwOTQ1MTA3MTU3OQ.G7HPnA.bHRmguSLWlgk7TNEWzIT3f0SIA7RpFJxarksWg")
+    bot.run("MTA0NDIyNDcwOTQ1MTA3MTU3OQ.GqaZfR.em6KVnMykFrolPCiizACkXmRzlgqswphaeG7QM")
