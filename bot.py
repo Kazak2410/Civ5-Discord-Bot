@@ -1,8 +1,12 @@
+import os
 import asyncio
 import random
 import disnake
 from disnake.ext import commands
+from dotenv import load_dotenv, find_dotenv
 
+
+load_dotenv(find_dotenv())
 
 PREFIX = "/"
 
@@ -72,4 +76,4 @@ async def start(ctx):
 
 
 def run_bot():
-    bot.run("MTA0NDIyNDcwOTQ1MTA3MTU3OQ.GqaZfR.em6KVnMykFrolPCiizACkXmRzlgqswphaeG7QM")
+    bot.run(os.getenv('TOKEN'))
